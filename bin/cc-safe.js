@@ -93,6 +93,50 @@ const DANGEROUS_PATTERNS = [
     severity: 'HIGH',
     description: 'Spawns processes until system crashes'
   },
+  {
+    name: '--dangerously-skip-permissions',
+    pattern: /--dangerously-skip-permissions/,
+    severity: 'HIGH',
+    description: 'Bypasses all Claude Code safety checks on host'
+  },
+  {
+    name: 'git reset --hard',
+    pattern: /\bgit\s+reset\s+--hard\b/,
+    severity: 'MEDIUM',
+    description: 'Discards all uncommitted changes permanently'
+  },
+  {
+    name: 'git clean -fd',
+    pattern: /\bgit\s+clean\s+-[a-zA-Z]*[fd][a-zA-Z]*[fd]/,
+    severity: 'MEDIUM',
+    description: 'Deletes all untracked files and directories'
+  },
+  {
+    name: 'npm publish',
+    pattern: /\b(npm|yarn)\s+publish\b/,
+    severity: 'MEDIUM',
+    description: 'Publishes package to public registry'
+  },
+  {
+    name: 'docker --privileged',
+    pattern: /\bdocker\s+run\b.*--privileged/,
+    severity: 'MEDIUM',
+    description: 'Container gets full access to host system',
+    skipContainerCheck: true
+  },
+  {
+    name: 'docker mount root',
+    pattern: /\bdocker\s+run\b.*-v\s+\/:/,
+    severity: 'MEDIUM',
+    description: 'Mounts entire host filesystem into container',
+    skipContainerCheck: true
+  },
+  {
+    name: 'eval',
+    pattern: /\beval\s+/,
+    severity: 'MEDIUM',
+    description: 'Executes strings as code, potential injection risk'
+  },
 ];
 
 // Special handling for git push - check most specific first
@@ -134,22 +178,24 @@ function checkGitPush(permission) {
 // Check a single permission entry for dangerous patterns
 export function checkPermission(permission) {
   const issues = [];
+  const inContainer = isInsideContainer(permission);
 
-  // Skip if running inside a container
-  if (isInsideContainer(permission)) {
-    return issues;
-  }
-
-  for (const { name, pattern, severity, description } of DANGEROUS_PATTERNS) {
+  for (const { name, pattern, severity, description, skipContainerCheck } of DANGEROUS_PATTERNS) {
+    // Skip container commands unless this pattern should bypass that check
+    if (inContainer && !skipContainerCheck) {
+      continue;
+    }
     if (pattern.test(permission)) {
       issues.push({ name, severity, description, permission });
     }
   }
 
   // Check git push separately (mutually exclusive patterns)
-  const gitPushIssue = checkGitPush(permission);
-  if (gitPushIssue) {
-    issues.push(gitPushIssue);
+  if (!inContainer) {
+    const gitPushIssue = checkGitPush(permission);
+    if (gitPushIssue) {
+      issues.push(gitPushIssue);
+    }
   }
 
   return issues;
