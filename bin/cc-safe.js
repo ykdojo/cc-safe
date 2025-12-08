@@ -19,8 +19,8 @@ const CONTAINER_PREFIXES = [
   'orb -m',
 ];
 
-// Check if command runs inside a container
-function isInsideContainer(command) {
+// Check if command runs inside a container/VM
+export function isInsideContainer(command) {
   const lowerCmd = command.toLowerCase();
   return CONTAINER_PREFIXES.some(prefix => lowerCmd.includes(prefix));
 }
@@ -36,7 +36,7 @@ const DANGEROUS_PATTERNS = [
 ];
 
 // Check a single permission entry for dangerous patterns
-function checkPermission(permission) {
+export function checkPermission(permission) {
   const issues = [];
 
   // Skip if running inside a container
@@ -176,4 +176,7 @@ async function main() {
   process.exit(1);
 }
 
-main().catch(console.error);
+// Only run main when executed directly (not imported for testing)
+if (process.argv[1]?.endsWith('cc-safe.js')) {
+  main().catch(console.error);
+}
