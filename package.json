@@ -1,6 +1,6 @@
 {
   "name": "cc-safe",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Security scanner for Claude Code settings files",
   "main": "index.js",
   "bin": {
