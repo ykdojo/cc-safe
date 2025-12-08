@@ -103,6 +103,10 @@ Summary: 2 high, 1 medium risk pattern(s) found
 
 - Node.js 22+
 
+## Origin
+
+Originally published as [Tip #32](https://github.com/ykdojo/claude-code-tips?tab=readme-ov-file#tip-32-audit-your-approved-commands) in [Claude Code Tips](https://github.com/ykdojo/claude-code-tips).
+
 ## License
 
 See [LICENSE](LICENSE)
