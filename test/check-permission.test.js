@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { checkPermission, isInsideContainer } from '../bin/cc-safe.js';
+import { checkPermission, isInsideContainer } from '../lib/checker.js';
 
 describe('isInsideContainer', () => {
   test('detects docker exec', () => {

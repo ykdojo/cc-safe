@@ -1,6 +1,6 @@
 {
   "name": "cc-safe",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Security linter for Claude Code settings files",
   "main": "index.js",
   "bin": {
