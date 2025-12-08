@@ -596,3 +596,83 @@ describe('checkPermission - rm (broad) detection', () => {
     assert.strictEqual(issues.length, 0);
   });
 });
+
+describe('checkPermission - arbitrary interpreter execution', () => {
+  test('flags Bash(python:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(python:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'python (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(python3:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(python3:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'python (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(node:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(node:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'node (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(ruby:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(ruby:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'ruby (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(perl:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(perl:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'perl (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(php:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(php:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'php (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(go run:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(go run:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'go run (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(deno run:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(deno run:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'deno run (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags Bash(bun run:*) as MEDIUM', () => {
+    const issues = checkPermission('Bash(bun run:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'bun run (arbitrary)');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('does not flag specific python script', () => {
+    const issues = checkPermission('Bash(python script.py)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag specific node script', () => {
+    const issues = checkPermission('Bash(node index.js)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag python:* in container', () => {
+    const issues = checkPermission('Bash(docker exec app python:*)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
