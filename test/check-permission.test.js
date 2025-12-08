@@ -71,9 +71,37 @@ describe('checkPermission - sudo detection', () => {
   });
 
   // Edge cases
-  test('flags sudo even in complex tmux commands', () => {
-    const issues = checkPermission("Bash('some command with sudo node patch-cli.js' Enter)");
+  test('flags sudo in tmux send-keys commands', () => {
+    const issues = checkPermission("Bash(tmux send-keys 'sudo apt install foo' Enter)");
     assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo');
+  });
+
+  test('flags sudo after shell operators', () => {
+    const issues = checkPermission('Bash(echo test && sudo rm -rf /)');
+    assert.strictEqual(issues.length >= 1, true);
+    assert.strictEqual(issues.some(i => i.name === 'sudo'), true);
+  });
+
+  test('flags sudo after pipe', () => {
+    const issues = checkPermission('Bash(echo password | sudo -S command)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo');
+  });
+
+  test('does not flag sudo in git commit messages', () => {
+    const issues = checkPermission(`Bash(git commit -m "$(cat <<'EOF'
+Add dangerous pattern detection (starting with sudo)
+
+- Parse settings files and check permissions.allow for dangerous patterns
+EOF
+)")`);
+    assert.strictEqual(issues.filter(i => i.name === 'sudo').length, 0);
+  });
+
+  test('does not flag sudo mentioned mid-sentence', () => {
+    const issues = checkPermission('Bash(echo "This feature relates to sudo usage")');
+    assert.strictEqual(issues.filter(i => i.name === 'sudo').length, 0);
   });
 
   test('does not flag "sudo" as part of another word', () => {
