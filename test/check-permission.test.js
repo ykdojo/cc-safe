@@ -44,10 +44,103 @@ describe('checkPermission - sudo detection', () => {
     assert.strictEqual(issues[0].severity, 'MEDIUM');
   });
 
-  test('flags sudo with wildcard', () => {
+  test('flags sudo with read-only command as LOW', () => {
     const issues = checkPermission('Bash(sudo du:*)');
     assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo with dangerous command as MEDIUM', () => {
+    const issues = checkPermission('Bash(sudo chmod 777 /tmp)');
+    assert.strictEqual(issues.length, 2); // both 'chmod 777' and 'sudo'
+    const sudoIssue = issues.find(i => i.name === 'sudo');
+    assert.ok(sudoIssue);
+    assert.strictEqual(sudoIssue.severity, 'MEDIUM');
+  });
+
+  test('flags sudo apt-cache as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo apt-cache policy firefox-esr)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo ls as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo ls -la /root)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo df as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo df -h)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo ps as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo ps aux)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo cat as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo cat /etc/shadow)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo lsof as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo lsof -i :80)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo journalctl as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo journalctl -u nginx)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo systemctl status as LOW (read-only)', () => {
+    const issues = checkPermission('Bash(sudo systemctl status nginx)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags sudo apt install as MEDIUM (dangerous)', () => {
+    const issues = checkPermission('Bash(sudo apt install vim)');
+    assert.strictEqual(issues.length, 1);
     assert.strictEqual(issues[0].name, 'sudo');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags sudo systemctl restart as MEDIUM (dangerous)', () => {
+    const issues = checkPermission('Bash(sudo systemctl restart nginx)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags sudo chown as MEDIUM (dangerous)', () => {
+    const issues = checkPermission('Bash(sudo chown root:root /etc/passwd)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags sudo with wildcard pattern on read-only command as LOW', () => {
+    const issues = checkPermission('Bash(sudo ls:*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'sudo (read-only)');
+    assert.strictEqual(issues[0].severity, 'LOW');
   });
 
   test('does not flag sudo in docker exec', () => {

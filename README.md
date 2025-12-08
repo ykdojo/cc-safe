@@ -57,7 +57,7 @@ cc-safe scans `.claude/settings.json` and `.claude/settings.local.json` files fo
 - `--dangerously-skip-permissions` - Bypasses all safety checks
 
 **MEDIUM** - Potentially dangerous:
-- `sudo` - Runs commands as root
+- `sudo` (with system-modifying commands) - Runs commands as root
 - `git reset --hard` - Discards uncommitted changes
 - `git clean -fd` - Deletes untracked files
 - `npm publish` / `yarn publish` - Publishes to npm registry
@@ -70,6 +70,7 @@ cc-safe scans `.claude/settings.json` and `.claude/settings.local.json` files fo
 - `git push --force-with-lease` - Safer but still rewrites history
 
 **LOW** - Worth noting:
+- `sudo` (with read-only commands) - Runs safe commands as root (e.g., `sudo du`, `sudo ls`, `sudo cat`, `sudo apt-cache`, `sudo ps`)
 - `git push` - Pushes to remote repository
 - `rm` / `rm *` - Broad file deletion patterns
 
