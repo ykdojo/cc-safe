@@ -1,0 +1,21 @@
+{
+  "name": "cc-safe",
+  "version": "0.1.0",
+  "description": "Security linter for Claude Code settings files",
+  "main": "index.js",
+  "bin": {
+    "cc-safe": "./bin/cc-safe.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ykdojo/cc-safe"
+  },
+  "scripts": {
+    "start": "node bin/cc-safe.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["claude", "claude-code", "security", "linter", "cli"],
+  "author": "YK Sugi",
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module"
+}
