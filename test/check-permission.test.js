@@ -134,3 +134,42 @@ describe('checkPermission - Bash(*) wildcard detection', () => {
     assert.strictEqual(issues.length, 0);
   });
 });
+
+describe('checkPermission - git push detection', () => {
+  test('flags git push --force as HIGH', () => {
+    const issues = checkPermission('Bash(git push --force)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'git push --force');
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('flags git push -f as HIGH', () => {
+    const issues = checkPermission('Bash(git push -f)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('flags git push --force-with-lease as MEDIUM', () => {
+    const issues = checkPermission('Bash(git push --force-with-lease)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags regular git push as LOW', () => {
+    const issues = checkPermission('Bash(git push)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'git push');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags git push with remote/branch as LOW', () => {
+    const issues = checkPermission('Bash(git push origin main)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('does not flag git push in docker exec', () => {
+    const issues = checkPermission('Bash(docker exec container git push --force)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
