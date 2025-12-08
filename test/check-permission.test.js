@@ -114,6 +114,11 @@ describe('checkPermission - rm -rf detection', () => {
     const issues = checkPermission('Bash(rm file.txt)');
     assert.strictEqual(issues.length, 0);
   });
+
+  test('does not flag docker rm -f (different command)', () => {
+    const issues = checkPermission('Bash(docker rm -f container)');
+    assert.strictEqual(issues.length, 0);
+  });
 });
 
 describe('checkPermission - Bash(*) wildcard detection', () => {

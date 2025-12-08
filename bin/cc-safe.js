@@ -35,7 +35,7 @@ const DANGEROUS_PATTERNS = [
   },
   {
     name: 'rm -rf',
-    pattern: /\brm\s+(-[a-zA-Z]*f|-f[a-zA-Z]*|--force)/,
+    pattern: /(?<!docker |podman )\brm\s+(-[a-zA-Z]*f|-f[a-zA-Z]*|--force)/,
     severity: 'HIGH',
     description: 'Force-deletes files without confirmation'
   },
@@ -44,8 +44,44 @@ const DANGEROUS_PATTERNS = [
     pattern: /^Bash\(\*\)$/,
     severity: 'HIGH',
     description: 'Allows ANY bash command without approval'
-  }
+  },
 ];
+
+// Special handling for git push - check most specific first
+function checkGitPush(permission) {
+  if (!/\bgit\s+push\b/.test(permission)) {
+    return null;
+  }
+
+  // Check force flags (but not force-with-lease)
+  if (/\bgit\s+push\b.*\s(-f|--force)(?!-with-lease)\b/.test(permission) ||
+      /\bgit\s+push\s+(-f|--force)(?!-with-lease)\b/.test(permission)) {
+    return {
+      name: 'git push --force',
+      severity: 'HIGH',
+      description: 'Overwrites remote git history, can destroy work',
+      permission
+    };
+  }
+
+  // Check force-with-lease
+  if (/\bgit\s+push\b.*--force-with-lease\b/.test(permission)) {
+    return {
+      name: 'git push --force-with-lease',
+      severity: 'MEDIUM',
+      description: 'Safer force push but still rewrites history',
+      permission
+    };
+  }
+
+  // Regular git push
+  return {
+    name: 'git push',
+    severity: 'LOW',
+    description: 'Pushes commits to remote repository',
+    permission
+  };
+}
 
 // Check a single permission entry for dangerous patterns
 export function checkPermission(permission) {
@@ -60,6 +96,12 @@ export function checkPermission(permission) {
     if (pattern.test(permission)) {
       issues.push({ name, severity, description, permission });
     }
+  }
+
+  // Check git push separately (mutually exclusive patterns)
+  const gitPushIssue = checkGitPush(permission);
+  if (gitPushIssue) {
+    issues.push(gitPushIssue);
   }
 
   return issues;
@@ -143,7 +185,9 @@ async function findSettingsFiles(targetDir) {
 }
 
 async function main() {
-  const targetDir = resolve(process.argv[2] || '.');
+  const args = process.argv.slice(2);
+  const noLow = args.includes('--no-low');
+  const targetDir = resolve(args.find(a => !a.startsWith('--')) || '.');
 
   console.log(`Scanning for Claude Code settings files in: ${targetDir}\n`);
 
@@ -159,7 +203,10 @@ async function main() {
   const allFindings = [];
 
   for (const file of files) {
-    const issues = await analyzeSettingsFile(file);
+    let issues = await analyzeSettingsFile(file);
+    if (noLow) {
+      issues = issues.filter(i => i.severity !== 'LOW');
+    }
     if (issues.length > 0) {
       allFindings.push({ file, issues });
     }
@@ -173,6 +220,7 @@ async function main() {
   // Report findings
   let totalHigh = 0;
   let totalMedium = 0;
+  let totalLow = 0;
 
   for (const { file, issues } of allFindings) {
     console.log(file);
@@ -180,11 +228,16 @@ async function main() {
       console.log(`  [${severity}] ${name}: "${permission}"`);
       if (severity === 'HIGH') totalHigh++;
       else if (severity === 'MEDIUM') totalMedium++;
+      else if (severity === 'LOW') totalLow++;
     }
     console.log();
   }
 
-  console.log(`Summary: ${totalHigh} high, ${totalMedium} medium risk pattern(s) found`);
+  const parts = [];
+  if (totalHigh > 0) parts.push(`${totalHigh} high`);
+  if (totalMedium > 0) parts.push(`${totalMedium} medium`);
+  if (totalLow > 0) parts.push(`${totalLow} low`);
+  console.log(`Summary: ${parts.join(', ')} risk pattern(s) found`);
   process.exit(1);
 }
 
