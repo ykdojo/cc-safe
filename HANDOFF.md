@@ -61,28 +61,41 @@ Parse the found settings files and flag dangerous patterns in `permissions.allow
 
 ### Dangerous Patterns to Flag
 
+**Important:** Commands run inside containers (e.g., `docker exec`, `podman exec`) are generally safe and should NOT be flagged. The danger is when these commands run directly on the host machine.
+
 **High Risk:**
-- `rm -rf`, `rm -f`, `rm --force`
-- `git push --force`, `git push -f`
-- `chmod 777`, `chmod -R`
-- `sudo` anything
-- `curl | sh`, `curl | bash`, `wget | sh` (pipe to shell)
-- `dd if=`
-- `mkfs`, `fdisk`
-- `> /dev/sda` or similar device writes
-- `:(){ :|:& };:` (fork bomb patterns)
+
+| Pattern | Description |
+|---------|-------------|
+| `rm -rf`, `rm -f`, `rm --force` | Force-deletes files without confirmation. Can wipe entire directories or system files if misused. |
+| `git push --force`, `git push -f` | Overwrites remote git history. Can destroy teammates' work and cause data loss in shared repos. |
+| `chmod 777` | Makes files readable/writable/executable by everyone. Major security hole - any user or process can modify or execute the file. |
+| `chmod -R` | Recursively changes permissions on entire directory trees. One mistake can expose thousands of files. |
+| `sudo` | Runs commands as root/administrator. Gives full system access - a bad command can destroy the OS. |
+| `curl \| sh`, `curl \| bash`, `wget \| sh` | Downloads and immediately executes code from the internet. You're running arbitrary code without reviewing it first - classic malware vector. |
+| `dd if=` | Low-level disk copy tool. Can overwrite entire disks, bootloaders, or partitions. One wrong `of=` target and your disk is gone. |
+| `mkfs` | Creates filesystems. Destroys all existing data on the target device. |
+| `fdisk` | Modifies disk partition tables. Can make disks unbootable or destroy partition layouts. |
+| `> /dev/sda` | Writes directly to raw disk devices. Bypasses filesystem, destroys everything on the disk. |
+| `:(){ :\|:& };:` | Fork bomb. Spawns processes exponentially until system runs out of resources and crashes. |
 
 **Medium Risk:**
-- `git reset --hard`
-- `git clean -fd`
-- `npm publish`, `yarn publish`
-- `docker run --privileged`
-- `docker run -v /:/host`
-- `eval`, `exec` in shell contexts
+
+| Pattern | Description |
+|---------|-------------|
+| `git reset --hard` | Discards all uncommitted changes permanently. No way to recover unsaved work. |
+| `git clean -fd` | Deletes all untracked files and directories. Can remove files you meant to keep but forgot to commit. |
+| `npm publish`, `yarn publish` | Publishes package to public registry. Accidental publish can leak private code or break downstream users. |
+| `docker run --privileged` | Container gets full access to host system. Defeats the security isolation that containers provide. |
+| `docker run -v /:/host` | Mounts entire host filesystem into container. Container can read/modify any file on host. |
+| `eval`, `exec` | Executes strings as code. If the string comes from user input, it's a code injection vulnerability. |
 
 **Configuration Red Flags:**
-- Overly permissive patterns like `Bash(*)`
-- `--dangerously-skip-permissions` in any command
+
+| Pattern | Description |
+|---------|-------------|
+| `Bash(*)` | Allows ANY bash command without approval. Defeats the entire permission system. |
+| `--dangerously-skip-permissions` | Only flag if NOT inside a container command. Running Claude Code with skipped permissions on the host machine bypasses all safety checks. Inside containers (docker exec, etc.) this is acceptable since the container provides isolation. |
 
 ### Implementation Approach
 
