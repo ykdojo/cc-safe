@@ -32,6 +32,18 @@ const DANGEROUS_PATTERNS = [
     pattern: /\bsudo\b/,
     severity: 'HIGH',
     description: 'Runs commands as root/administrator'
+  },
+  {
+    name: 'rm -rf',
+    pattern: /\brm\s+(-[a-zA-Z]*f|-f[a-zA-Z]*|--force)/,
+    severity: 'HIGH',
+    description: 'Force-deletes files without confirmation'
+  },
+  {
+    name: 'Bash(*)',
+    pattern: /^Bash\(\*\)$/,
+    severity: 'HIGH',
+    description: 'Allows ANY bash command without approval'
   }
 ];
 
