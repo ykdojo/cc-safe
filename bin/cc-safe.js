@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process';
-import { glob, readFile } from 'node:fs/promises';
+import { glob, readFile, realpath } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { platform } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 const HELP_TEXT = `
 cc-safe - Security linter for Claude Code settings files
@@ -404,7 +405,9 @@ async function main() {
 }
 
 // Only run main when executed directly (not imported for testing)
-const isMainModule = import.meta.url === `file://${process.argv[1]}`;
-if (isMainModule) {
+// Resolve symlinks to handle npm global install (which creates symlinks)
+const currentFile = fileURLToPath(import.meta.url);
+const executedFile = await realpath(process.argv[1]).catch(() => process.argv[1]);
+if (currentFile === executedFile) {
   main().catch(console.error);
 }
