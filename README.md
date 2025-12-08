@@ -2,6 +2,14 @@
 
 Security linter for Claude Code settings files. Scans for dangerous patterns in your approved commands that could compromise your host machine. You can run it manually or ask Claude Code to run it with `npx cc-safe .`
 
+## Motivation
+
+A user [reported on Reddit](https://www.reddit.com/r/ClaudeAI/comments/1pgxckk/claude_cli_deleted_my_entire_home_directory_wiped/) that Claude Code ran `rm -rf tests/ patches/ plan/ ~/` - that trailing `~/` wiped their entire home directory.
+
+It's easy to dismiss this as a "vibe coder" mistake, but when you're approving dozens of commands across multiple projects, mistakes happen. The permission prompt becomes muscle memory, and one bad approval can be catastrophic.
+
+cc-safe automates what's hard to do manually: scan all your approved commands across all projects and flag the dangerous ones before they cause damage.
+
 ## Installation
 
 ```bash
