@@ -26,6 +26,6 @@ npm install -g cc-safe
 cc-safe ~/projects
 ```
 
-GitHub: [link]
+GitHub: https://github.com/ykdojo/cc-safe
 
-What other patterns should be detected?
+Originally posted [here](https://github.com/ykdojo/claude-code-tips?tab=readme-ov-file#tip-32-audit-your-approved-commands).
