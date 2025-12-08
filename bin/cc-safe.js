@@ -45,6 +45,54 @@ const DANGEROUS_PATTERNS = [
     severity: 'HIGH',
     description: 'Allows ANY bash command without approval'
   },
+  {
+    name: 'chmod 777',
+    pattern: /\bchmod\s+777\b/,
+    severity: 'HIGH',
+    description: 'Makes files readable/writable/executable by everyone'
+  },
+  {
+    name: 'chmod -R',
+    pattern: /\bchmod\s+-[a-zA-Z]*R/,
+    severity: 'HIGH',
+    description: 'Recursively changes permissions on entire directory trees'
+  },
+  {
+    name: 'curl | sh',
+    pattern: /\b(curl|wget)\b.*\|\s*(sh|bash)\b/,
+    severity: 'HIGH',
+    description: 'Downloads and executes code from the internet without review'
+  },
+  {
+    name: 'dd',
+    pattern: /\bdd\s+if=/,
+    severity: 'HIGH',
+    description: 'Low-level disk copy, can overwrite entire disks'
+  },
+  {
+    name: 'mkfs',
+    pattern: /\bmkfs\b/,
+    severity: 'HIGH',
+    description: 'Creates filesystems, destroys existing data'
+  },
+  {
+    name: 'fdisk',
+    pattern: /\bfdisk\b/,
+    severity: 'HIGH',
+    description: 'Modifies disk partition tables'
+  },
+  {
+    name: '> /dev/',
+    pattern: />\s*\/dev\/(sd|hd|nvme|vd)/,
+    severity: 'HIGH',
+    description: 'Writes directly to raw disk devices'
+  },
+  {
+    name: 'fork bomb',
+    pattern: /:\(\)\s*\{\s*:\|:&\s*\}\s*;:/,
+    severity: 'HIGH',
+    description: 'Spawns processes until system crashes'
+  },
 ];
 
 // Special handling for git push - check most specific first
