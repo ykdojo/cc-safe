@@ -1,6 +1,6 @@
 # cc-safe
 
-Security linter for Claude Code settings files. Scans for dangerous patterns in your approved commands that could compromise your host machine. You can run it manually or ask Claude Code to run it with `npx cc-safe .`
+Security scanner for Claude Code settings files. Scans for dangerous patterns in your approved commands that could compromise your host machine. You can run it manually or ask Claude Code to run it with `npx cc-safe .`
 
 ## Motivation
 
@@ -46,7 +46,7 @@ cc-safe scans `.claude/settings.json` and `.claude/settings.local.json` files fo
 
 **HIGH** - Critical security risks:
 - `rm -rf` / `rm -f` - Force-deletes files
-- `Bash(*)` - Allows ANY bash command
+- `Bash` - Allows ANY bash command (without specifier)
 - `chmod 777` - World-writable permissions
 - `chmod -R` - Recursive permission changes
 - `curl | sh` - Downloads and executes code
@@ -91,7 +91,7 @@ Found 3 settings file(s), analyzing...
 
 /Users/you/projects/webapp/.claude/settings.json
   [HIGH] sudo: "Bash(sudo *)"
-  [HIGH] Bash(*): "Bash(*)"
+  [HIGH] Bash (allow all): "Bash"
 
 /Users/you/projects/scripts/.claude/settings.local.json
   [MEDIUM] git reset --hard: "Bash(git reset --hard)"

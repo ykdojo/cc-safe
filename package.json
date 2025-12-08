@@ -1,7 +1,7 @@
 {
   "name": "cc-safe",
-  "version": "0.1.5",
-  "description": "Security linter for Claude Code settings files",
+  "version": "0.1.6",
+  "description": "Security scanner for Claude Code settings files",
   "main": "index.js",
   "bin": {
     "cc-safe": "bin/cc-safe.js"
@@ -18,7 +18,7 @@
     "claude",
     "claude-code",
     "security",
-    "linter",
+    "scanner",
     "cli"
   ],
   "author": "YK Sugi",

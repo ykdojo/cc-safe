@@ -7,7 +7,7 @@ import { platform } from 'node:os';
 import { checkPermission } from '../lib/checker.js';
 
 const HELP_TEXT = `
-cc-safe - Security linter for Claude Code settings files
+cc-safe - Security scanner for Claude Code settings files
 
 Scans directories for .claude/settings.json and .claude/settings.local.json
 files, flagging dangerous patterns in approved commands that could compromise
@@ -26,7 +26,7 @@ OPTIONS
   --help, -h     Show this help message
 
 SEVERITY LEVELS
-  HIGH    Critical security risks (rm -rf, chmod 777, Bash(*), etc.)
+  HIGH    Critical security risks (rm -rf, chmod 777, Bash, etc.)
   MEDIUM  Potentially dangerous operations (sudo, git reset --hard, npm publish)
   LOW     Worth noting but less risky (git push)
 
@@ -192,7 +192,6 @@ async function main() {
   if (totalMedium > 0) parts.push(`${totalMedium} medium`);
   if (totalLow > 0) parts.push(`${totalLow} low`);
   console.log(`Summary: ${parts.join(', ')} risk pattern(s) found`);
-  process.exit(1);
 }
 
 main().catch(console.error);

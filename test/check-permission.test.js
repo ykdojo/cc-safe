@@ -121,11 +121,11 @@ describe('checkPermission - rm -rf detection', () => {
   });
 });
 
-describe('checkPermission - Bash(*) wildcard detection', () => {
-  test('flags Bash(*) - allows any command', () => {
-    const issues = checkPermission('Bash(*)');
+describe('checkPermission - Bash (allow all) detection', () => {
+  test('flags Bash - allows any command', () => {
+    const issues = checkPermission('Bash');
     assert.strictEqual(issues.length, 1);
-    assert.strictEqual(issues[0].name, 'Bash(*)');
+    assert.strictEqual(issues[0].name, 'Bash (allow all)');
     assert.strictEqual(issues[0].severity, 'HIGH');
   });
 
