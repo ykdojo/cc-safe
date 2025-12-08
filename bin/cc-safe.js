@@ -404,6 +404,7 @@ async function main() {
 }
 
 // Only run main when executed directly (not imported for testing)
-if (process.argv[1]?.endsWith('cc-safe.js')) {
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
   main().catch(console.error);
 }
