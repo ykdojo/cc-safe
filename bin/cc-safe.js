@@ -17,8 +17,8 @@ USAGE
   cc-safe <directory> [options]
 
 EXAMPLES
-  cc-safe .                  Scan current directory
-  cc-safe ~/projects         Scan a specific directory
+  cc-safe .                  Scan current directory and all subfolders
+  cc-safe ~/projects         Scan a specific directory and all subfolders
   cc-safe . --no-low         Hide LOW severity findings
 
 OPTIONS

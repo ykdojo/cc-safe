@@ -25,8 +25,8 @@ cc-safe <directory> [options]
 ### Examples
 
 ```bash
-cc-safe .                  # Scan current directory
-cc-safe ~/projects         # Scan a specific directory
+cc-safe .                  # Scan current directory and all subfolders
+cc-safe ~/projects         # Scan a specific directory recursively
 cc-safe . --no-low         # Hide LOW severity findings
 cc-safe --help             # Show help
 ```
