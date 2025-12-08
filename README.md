@@ -45,7 +45,6 @@ cc-safe scans `.claude/settings.json` and `.claude/settings.local.json` files fo
 ### Severity Levels
 
 **HIGH** - Critical security risks:
-- `sudo` - Runs commands as root
 - `rm -rf` / `rm -f` - Force-deletes files
 - `Bash(*)` - Allows ANY bash command
 - `chmod 777` - World-writable permissions
@@ -58,6 +57,7 @@ cc-safe scans `.claude/settings.json` and `.claude/settings.local.json` files fo
 - `--dangerously-skip-permissions` - Bypasses all safety checks
 
 **MEDIUM** - Potentially dangerous:
+- `sudo` - Runs commands as root
 - `git reset --hard` - Discards uncommitted changes
 - `git clean -fd` - Deletes untracked files
 - `npm publish` / `yarn publish` - Publishes to npm registry

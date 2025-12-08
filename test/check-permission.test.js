@@ -41,7 +41,7 @@ describe('checkPermission - sudo detection', () => {
     const issues = checkPermission('Bash(sudo apt update)');
     assert.strictEqual(issues.length, 1);
     assert.strictEqual(issues[0].name, 'sudo');
-    assert.strictEqual(issues[0].severity, 'HIGH');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
   });
 
   test('flags sudo with wildcard', () => {

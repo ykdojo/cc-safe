@@ -26,8 +26,8 @@ OPTIONS
   --help, -h     Show this help message
 
 SEVERITY LEVELS
-  HIGH    Critical security risks (sudo, rm -rf, chmod 777, etc.)
-  MEDIUM  Potentially dangerous operations (git reset --hard, npm publish)
+  HIGH    Critical security risks (rm -rf, chmod 777, Bash(*), etc.)
+  MEDIUM  Potentially dangerous operations (sudo, git reset --hard, npm publish)
   LOW     Worth noting but less risky (git push)
 
 TIP
@@ -82,7 +82,10 @@ function findSettingsFilesUnix(targetDir) {
   }
 
   // find returns non-zero on permission errors, but still outputs valid results
-  return result.stdout.trim().split('\n').filter(Boolean);
+  const files = result.stdout.trim().split('\n').filter(Boolean);
+
+  // On macOS, /System/Volumes/Data/Users is a firmlink to /Users - skip duplicates
+  return files.filter(f => !f.startsWith('/System/Volumes/Data/'));
 }
 
 // Fallback to Node glob for Windows
