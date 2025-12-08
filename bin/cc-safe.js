@@ -1,11 +1,77 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process';
-import { glob } from 'node:fs/promises';
+import { glob, readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { platform } from 'node:os';
 
 const IGNORE_DIRS = ['node_modules', '.git', 'dist', 'build', 'vendor'];
+
+// Container/VM command prefixes - commands run inside these are safe
+const CONTAINER_PREFIXES = [
+  'docker exec',
+  'podman exec',
+  'nerdctl exec',
+  'kubectl exec',
+  'docker run',
+  'podman run',
+  'orb run',
+  'orb -m',
+];
+
+// Check if command runs inside a container
+function isInsideContainer(command) {
+  const lowerCmd = command.toLowerCase();
+  return CONTAINER_PREFIXES.some(prefix => lowerCmd.includes(prefix));
+}
+
+// Dangerous patterns with severity
+const DANGEROUS_PATTERNS = [
+  {
+    name: 'sudo',
+    pattern: /\bsudo\b/,
+    severity: 'HIGH',
+    description: 'Runs commands as root/administrator'
+  }
+];
+
+// Check a single permission entry for dangerous patterns
+function checkPermission(permission) {
+  const issues = [];
+
+  // Skip if running inside a container
+  if (isInsideContainer(permission)) {
+    return issues;
+  }
+
+  for (const { name, pattern, severity, description } of DANGEROUS_PATTERNS) {
+    if (pattern.test(permission)) {
+      issues.push({ name, severity, description, permission });
+    }
+  }
+
+  return issues;
+}
+
+// Analyze a settings file for dangerous patterns
+async function analyzeSettingsFile(filePath) {
+  try {
+    const content = await readFile(filePath, 'utf-8');
+    const settings = JSON.parse(content);
+
+    const allowList = settings?.permissions?.allow || [];
+    const issues = [];
+
+    for (const permission of allowList) {
+      issues.push(...checkPermission(permission));
+    }
+
+    return issues;
+  } catch (err) {
+    // Skip files that can't be read or parsed
+    return [];
+  }
+}
 
 // Use native find on Mac/Linux for speed
 function findSettingsFilesUnix(targetDir) {
@@ -73,12 +139,41 @@ async function main() {
 
   if (files.length === 0) {
     console.log('No Claude Code settings files found.');
-  } else {
-    console.log(`Found ${files.length} settings file(s):\n`);
-    for (const file of files) {
-      console.log(`  ${file}`);
+    return;
+  }
+
+  console.log(`Found ${files.length} settings file(s), analyzing...\n`);
+
+  const allFindings = [];
+
+  for (const file of files) {
+    const issues = await analyzeSettingsFile(file);
+    if (issues.length > 0) {
+      allFindings.push({ file, issues });
     }
   }
+
+  if (allFindings.length === 0) {
+    console.log('No dangerous patterns found.');
+    return;
+  }
+
+  // Report findings
+  let totalHigh = 0;
+  let totalMedium = 0;
+
+  for (const { file, issues } of allFindings) {
+    console.log(file);
+    for (const { name, severity, permission } of issues) {
+      console.log(`  [${severity}] ${name}: "${permission}"`);
+      if (severity === 'HIGH') totalHigh++;
+      else if (severity === 'MEDIUM') totalMedium++;
+    }
+    console.log();
+  }
+
+  console.log(`Summary: ${totalHigh} high, ${totalMedium} medium risk pattern(s) found`);
+  process.exit(1);
 }
 
 main().catch(console.error);
