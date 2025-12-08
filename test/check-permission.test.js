@@ -277,3 +277,102 @@ describe('checkPermission - fork bomb detection', () => {
     assert.strictEqual(issues[0].severity, 'HIGH');
   });
 });
+
+describe('checkPermission - git reset/clean detection', () => {
+  test('flags git reset --hard as MEDIUM', () => {
+    const issues = checkPermission('Bash(git reset --hard HEAD~1)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'git reset --hard');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags git clean -fd as MEDIUM', () => {
+    const issues = checkPermission('Bash(git clean -fd)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'git clean -fd');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags git clean -df as MEDIUM', () => {
+    const issues = checkPermission('Bash(git clean -df)');
+    assert.strictEqual(issues.length, 1);
+  });
+
+  test('does not flag git reset without --hard', () => {
+    const issues = checkPermission('Bash(git reset HEAD~1)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag git clean without -f', () => {
+    const issues = checkPermission('Bash(git clean -n)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
+
+describe('checkPermission - npm/yarn publish detection', () => {
+  test('flags npm publish as MEDIUM', () => {
+    const issues = checkPermission('Bash(npm publish)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'npm publish');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags yarn publish as MEDIUM', () => {
+    const issues = checkPermission('Bash(yarn publish)');
+    assert.strictEqual(issues.length, 1);
+  });
+
+  test('does not flag npm publish in container', () => {
+    const issues = checkPermission('Bash(docker exec app npm publish)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
+
+describe('checkPermission - docker privileged detection', () => {
+  test('flags docker run --privileged as MEDIUM', () => {
+    const issues = checkPermission('Bash(docker run --privileged ubuntu)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'docker --privileged');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags docker run -v /:/host as MEDIUM', () => {
+    const issues = checkPermission('Bash(docker run -v /:/host ubuntu)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'docker mount root');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('does not flag docker run with normal volume', () => {
+    const issues = checkPermission('Bash(docker run -v /app:/app ubuntu)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
+
+describe('checkPermission - eval/exec detection', () => {
+  test('flags eval as MEDIUM', () => {
+    const issues = checkPermission('Bash(eval "$COMMAND")');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'eval');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('does not flag eval in container', () => {
+    const issues = checkPermission('Bash(docker exec app eval "$CMD")');
+    assert.strictEqual(issues.length, 0);
+  });
+});
+
+describe('checkPermission - dangerously-skip-permissions detection', () => {
+  test('flags --dangerously-skip-permissions on host as HIGH', () => {
+    const issues = checkPermission('Bash(claude --dangerously-skip-permissions)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, '--dangerously-skip-permissions');
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('does not flag --dangerously-skip-permissions in container', () => {
+    const issues = checkPermission('Bash(docker exec app claude --dangerously-skip-permissions)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
