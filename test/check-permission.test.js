@@ -543,6 +543,34 @@ describe('checkPermission - dangerously-skip-permissions detection', () => {
   });
 });
 
+describe('checkPermission - gh api detection', () => {
+  test('flags gh api as HIGH', () => {
+    const issues = checkPermission('Bash(gh api repos/{owner}/{repo}/issues)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'gh api');
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('flags gh api graphql as HIGH', () => {
+    const issues = checkPermission('Bash(gh api graphql -f query=\'mutation { ... }\')');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'gh api');
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('flags gh api with POST method as HIGH', () => {
+    const issues = checkPermission('Bash(gh api -X POST repos/{owner}/{repo}/issues -f title="test")');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'gh api');
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('does not flag gh api in container', () => {
+    const issues = checkPermission('Bash(docker exec app gh api repos/{owner}/{repo})');
+    assert.strictEqual(issues.length, 0);
+  });
+});
+
 describe('checkPermission - rm (broad) detection', () => {
   test('flags bare rm as LOW', () => {
     const issues = checkPermission('Bash(rm)');
