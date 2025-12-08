@@ -81,3 +81,56 @@ describe('checkPermission - sudo detection', () => {
     assert.strictEqual(issues.length, 0);
   });
 });
+
+describe('checkPermission - rm -rf detection', () => {
+  test('flags rm -rf on host', () => {
+    const issues = checkPermission('Bash(rm -rf /tmp/foo)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'rm -rf');
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('flags rm -rf with wildcard', () => {
+    const issues = checkPermission('Bash(rm -rf:*)');
+    assert.strictEqual(issues.length, 1);
+  });
+
+  test('flags rm -f (force without recursive)', () => {
+    const issues = checkPermission('Bash(rm -f file.txt)');
+    assert.strictEqual(issues.length, 1);
+  });
+
+  test('flags rm --force', () => {
+    const issues = checkPermission('Bash(rm --force file.txt)');
+    assert.strictEqual(issues.length, 1);
+  });
+
+  test('does not flag rm -rf in docker exec', () => {
+    const issues = checkPermission('Bash(docker exec container rm -rf /tmp)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag regular rm without force flags', () => {
+    const issues = checkPermission('Bash(rm file.txt)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
+
+describe('checkPermission - Bash(*) wildcard detection', () => {
+  test('flags Bash(*) - allows any command', () => {
+    const issues = checkPermission('Bash(*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'Bash(*)');
+    assert.strictEqual(issues[0].severity, 'HIGH');
+  });
+
+  test('does not flag Bash with specific command', () => {
+    const issues = checkPermission('Bash(npm install)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag Bash with wildcard in argument', () => {
+    const issues = checkPermission('Bash(ls *.js)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
