@@ -19,7 +19,7 @@ It's easy to dismiss it as a vibe coder mistake, but I don't want to make the sa
 
 ### Usage
 
-You can run it manually or ask Claude Code to run it for you with `npx cc-safe .`
+It recursively scans all subdirectories, so you can point it at your projects folder to check everything at once. You can run it manually or ask Claude Code to run it for you with `npx cc-safe .`
 
 ```bash
 npm install -g cc-safe

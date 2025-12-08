@@ -1,6 +1,6 @@
 # cc-safe
 
-Security scanner for Claude Code settings files. Scans for dangerous patterns in your approved commands that could compromise your host machine. You can run it manually or ask Claude Code to run it with `npx cc-safe .`
+Security scanner for Claude Code settings files. Recursively scans all subdirectories for dangerous patterns in your approved commands that could compromise your host machine. You can run it manually or ask Claude Code to run it with `npx cc-safe .`
 
 ## Motivation
 
