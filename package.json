@@ -1,6 +1,6 @@
 {
   "name": "cc-safe",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Security scanner for Claude Code settings files",
   "main": "index.js",
   "bin": {
@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "node bin/cc-safe.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "keywords": [
     "claude",

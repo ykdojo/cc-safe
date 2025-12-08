@@ -28,7 +28,7 @@ OPTIONS
 SEVERITY LEVELS
   HIGH    Critical security risks (rm -rf, chmod 777, Bash, etc.)
   MEDIUM  Potentially dangerous operations (sudo, git reset --hard, npm publish)
-  LOW     Worth noting but less risky (git push)
+  LOW     Worth noting but less risky (git push, broad rm)
 
 TIP
   In Claude Code: "Use cc-safe to check my Claude Code settings for security issues"

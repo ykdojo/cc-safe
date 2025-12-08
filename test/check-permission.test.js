@@ -421,3 +421,29 @@ describe('checkPermission - dangerously-skip-permissions detection', () => {
     assert.strictEqual(issues.length, 0);
   });
 });
+
+describe('checkPermission - rm (broad) detection', () => {
+  test('flags bare rm as LOW', () => {
+    const issues = checkPermission('Bash(rm)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'rm (broad)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('flags rm * as LOW', () => {
+    const issues = checkPermission('Bash(rm *)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'rm (broad)');
+    assert.strictEqual(issues[0].severity, 'LOW');
+  });
+
+  test('does not flag rm with specific file', () => {
+    const issues = checkPermission('Bash(rm file.txt)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag bare rm in container', () => {
+    const issues = checkPermission('Bash(docker exec app rm)');
+    assert.strictEqual(issues.length, 0);
+  });
+});

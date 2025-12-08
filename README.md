@@ -71,6 +71,7 @@ cc-safe scans `.claude/settings.json` and `.claude/settings.local.json` files fo
 
 **LOW** - Worth noting:
 - `git push` - Pushes to remote repository
+- `rm` / `rm *` - Broad file deletion patterns
 
 ### Container Awareness
 
