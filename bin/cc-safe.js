@@ -5,6 +5,41 @@ import { glob, readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { platform } from 'node:os';
 
+const HELP_TEXT = `
+cc-safe - Security linter for Claude Code settings files
+
+Scans directories for .claude/settings.json and .claude/settings.local.json
+files, flagging dangerous patterns in approved commands that could compromise
+your host machine.
+
+USAGE
+  cc-safe <directory> [options]
+
+EXAMPLES
+  cc-safe .                  Scan current directory
+  cc-safe ~/projects         Scan a specific directory
+  cc-safe . --no-low         Hide LOW severity findings
+
+OPTIONS
+  --no-low       Hide LOW severity findings (show only HIGH and MEDIUM)
+  --help, -h     Show this help message
+
+SEVERITY LEVELS
+  HIGH    Critical security risks (sudo, rm -rf, chmod 777, etc.)
+  MEDIUM  Potentially dangerous operations (git reset --hard, npm publish)
+  LOW     Worth noting but less risky (git push)
+
+TIP
+  In Claude Code: "Use cc-safe to check my Claude Code settings for security issues"
+
+MORE INFO
+  https://github.com/ykdojo/cc-safe
+`.trim();
+
+function showHelp() {
+  console.log(HELP_TEXT);
+}
+
 const IGNORE_DIRS = ['node_modules', '.git', 'dist', 'build', 'vendor'];
 
 // Container/VM command prefixes - commands run inside these are safe
@@ -280,8 +315,23 @@ async function findSettingsFiles(targetDir) {
 
 async function main() {
   const args = process.argv.slice(2);
+
+  // Show help if --help, -h, or no arguments
+  if (args.includes('--help') || args.includes('-h')) {
+    showHelp();
+    return;
+  }
+
   const noLow = args.includes('--no-low');
-  const targetDir = resolve(args.find(a => !a.startsWith('--')) || '.');
+  const dirArg = args.find(a => !a.startsWith('--'));
+
+  // No directory provided - show help
+  if (!dirArg) {
+    showHelp();
+    return;
+  }
+
+  const targetDir = resolve(dirArg);
 
   console.log(`Scanning for Claude Code settings files in: ${targetDir}\n`);
 
