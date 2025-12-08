@@ -1,0 +1,6 @@
+# Test files
+test/
+
+# Development files
+HANDOFF.md
+.claude/
