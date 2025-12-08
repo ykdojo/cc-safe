@@ -1,17 +1,11 @@
 # cc-safe
 
-Security linter for Claude Code settings files. Scans for dangerous patterns in your approved commands that could compromise your host machine.
+Security linter for Claude Code settings files. Scans for dangerous patterns in your approved commands that could compromise your host machine. You can run it manually or ask Claude Code to run it with `npx cc-safe .`
 
 ## Installation
 
 ```bash
 npm install -g cc-safe
-```
-
-Or run directly with npx:
-
-```bash
-npx cc-safe
 ```
 
 ## Usage
