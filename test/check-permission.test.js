@@ -328,6 +328,51 @@ describe('checkPermission - npm/yarn publish detection', () => {
   });
 });
 
+describe('checkPermission - Python/Ruby/Rust publish detection', () => {
+  test('flags twine upload as MEDIUM', () => {
+    const issues = checkPermission('Bash(twine upload dist/*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'twine upload');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags python -m twine upload as MEDIUM', () => {
+    const issues = checkPermission('Bash(python -m twine upload dist/*)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'twine upload');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags gem push as MEDIUM', () => {
+    const issues = checkPermission('Bash(gem push my-gem-1.0.0.gem)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'gem push');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('flags cargo publish as MEDIUM', () => {
+    const issues = checkPermission('Bash(cargo publish)');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, 'cargo publish');
+    assert.strictEqual(issues[0].severity, 'MEDIUM');
+  });
+
+  test('does not flag twine upload in container', () => {
+    const issues = checkPermission('Bash(docker exec app twine upload dist/*)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag gem push in container', () => {
+    const issues = checkPermission('Bash(docker exec app gem push pkg.gem)');
+    assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag cargo publish in container', () => {
+    const issues = checkPermission('Bash(docker exec app cargo publish)');
+    assert.strictEqual(issues.length, 0);
+  });
+});
+
 describe('checkPermission - docker privileged detection', () => {
   test('flags docker run --privileged as MEDIUM', () => {
     const issues = checkPermission('Bash(docker run --privileged ubuntu)');

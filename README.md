@@ -60,7 +60,10 @@ cc-safe scans `.claude/settings.json` and `.claude/settings.local.json` files fo
 **MEDIUM** - Potentially dangerous:
 - `git reset --hard` - Discards uncommitted changes
 - `git clean -fd` - Deletes untracked files
-- `npm publish` / `yarn publish` - Publishes to registry
+- `npm publish` / `yarn publish` - Publishes to npm registry
+- `twine upload` - Publishes to PyPI (Python)
+- `gem push` - Publishes to RubyGems
+- `cargo publish` - Publishes to crates.io (Rust)
 - `docker run --privileged` - Full host access
 - `docker run -v /:/` - Mounts entire host filesystem
 - `eval` - Code injection risk

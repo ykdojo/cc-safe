@@ -153,6 +153,24 @@ const DANGEROUS_PATTERNS = [
     description: 'Publishes package to public registry'
   },
   {
+    name: 'twine upload',
+    pattern: /\btwine\s+upload\b/,
+    severity: 'MEDIUM',
+    description: 'Publishes Python package to PyPI'
+  },
+  {
+    name: 'gem push',
+    pattern: /\bgem\s+push\b/,
+    severity: 'MEDIUM',
+    description: 'Publishes Ruby gem to RubyGems'
+  },
+  {
+    name: 'cargo publish',
+    pattern: /\bcargo\s+publish\b/,
+    severity: 'MEDIUM',
+    description: 'Publishes Rust crate to crates.io'
+  },
+  {
     name: 'docker --privileged',
     pattern: /\bdocker\s+run\b.*--privileged/,
     severity: 'MEDIUM',
