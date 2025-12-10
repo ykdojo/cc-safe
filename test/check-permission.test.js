@@ -537,9 +537,36 @@ describe('checkPermission - dangerously-skip-permissions detection', () => {
     assert.strictEqual(issues[0].severity, 'HIGH');
   });
 
+  test('flags --dangerously-skip-permissions with additional args', () => {
+    const issues = checkPermission('Bash(claude --dangerously-skip-permissions -p "task")');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].name, '--dangerously-skip-permissions');
+  });
+
   test('does not flag --dangerously-skip-permissions in container', () => {
     const issues = checkPermission('Bash(docker exec app claude --dangerously-skip-permissions)');
     assert.strictEqual(issues.length, 0);
+  });
+
+  test('does not flag --dangerously-skip-permissions in git commit message', () => {
+    const issues = checkPermission(`Bash(git commit -m "$(cat <<'EOF'
+Add non-root user to fix --dangerously-skip-permissions
+
+Claude Code refuses to run with skip-permissions as root.
+Created 'delfina' user in container.
+EOF
+)")`);
+    assert.strictEqual(issues.filter(i => i.name === '--dangerously-skip-permissions').length, 0);
+  });
+
+  test('does not flag --dangerously-skip-permissions mentioned in echo', () => {
+    const issues = checkPermission('Bash(echo "The --dangerously-skip-permissions flag is risky")');
+    assert.strictEqual(issues.filter(i => i.name === '--dangerously-skip-permissions').length, 0);
+  });
+
+  test('does not flag --dangerously-skip-permissions in quoted string', () => {
+    const issues = checkPermission("Bash(echo '--dangerously-skip-permissions should not be used')");
+    assert.strictEqual(issues.filter(i => i.name === '--dangerously-skip-permissions').length, 0);
   });
 });
 
